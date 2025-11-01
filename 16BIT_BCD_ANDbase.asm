@@ -1,13 +1,12 @@
         .MODEL SMALL
         .STACK 64
         .DATA
-        ;ENTER DATA
 RESULT_BITS DW ?
 REPORT      DB 0 
         
         .CODE
 MAIN PROC FAR
-          MOV AX, @DATA
+          MOV AX,@DATA
           MOV DS,AX 
           
           
