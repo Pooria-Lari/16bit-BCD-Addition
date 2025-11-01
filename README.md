@@ -96,3 +96,32 @@ CHECK_X000H:
 END_PROCESS:
 67   Store RESULT_BITS ← AX
 68   Terminate program
+```
+##  Description
+
+The algorithm performs BCD (Binary Coded Decimal) addition on two 16-bit numbers.<br>
+Each nibble (4 bits) of the result is checked individually:<br>
+If a nibble > 9, it adds 6 to correct it into valid BCD range.<br>
+The process repeats for all four nibbles (000XH → X000H).<br>
+The result is stored in RESULT_BITS, and a flag report is optionally updated.<br>
+
+## Registers Usage Table
+
+| Register | Purpose |
+|----------|---------|
+| **AX** | General data and partial result storage |
+| **BX** | Holds first operand |
+| **DX** | Holds second operand |
+| **CH** | High byte accumulator |
+| **CL** | Step counter for operations |
+| **AH** | Flag checking and temporary operations |
+
+## End of Program
+The algorithm stops after processing all 4 digits and saving the result.
+
+## Notes
+Based on 8086 Assembly structure (.MODEL SMALL, .DATA, .CODE).<br>
+Suitable for educational use in microprocessor or computer organization labs.<br>
+put logic and flags may vary depending on specific implementation details.<br>
+Time Complexity: **O(1)** <br>
+Space Complexity: **O(1)** <br>
