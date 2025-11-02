@@ -9,93 +9,81 @@ The algorithm adds two 16-bit numbers in BCD format and corrects digits greater 
 ## Pseudocode
 
 ```text
-BCD_ADD()
-1    Initialize AX, BX, DX, CL, CH to 0
-2    Set BX ← XXXXH          // First 16-bit number
-3    Set DX ← XXXXH          // Second 16-bit number
-4    Set CL ← 0              // Step counter
-
-5    LOOP:
-6        BX ← BX + DX
-
-7        if CL == 0 then
-8            goto CHECK_000XH
-9        else if CL == 1 then
-10           goto CHECK_00X0H
-11       else if CL == 2 then
-12           goto CHECK_0X00H
-13       else if CL == 3 then
-14           goto CHECK_X000H
-15       end if
-
-16       AH ← AH AND 1H
-17       REPORT ← REPORT OR AH
-18       AH ← CH
-19       RESULT_BITS ← AX
-20       goto END_PROCESS
-
+BCD_ADD(A, B)
+1    Initialize AX ← 0, CX ← 0
+2    REPORT ← 0
+3    RESULT_BITS ← 0         // Check Carry in X000H with CF
+4    LOOP:
+5        BX ← A              // First 16-bit BCD number
+6        DX ← B              // Second 16-bit BCD number
+7        BX ← BX + DX        // Perform initial addition
+8        if CL == 0 then
+9            goto CHECK_000XH
+10       else if CL == 1 then
+11           goto CHECK_00X0H
+12       else if CL == 2 then
+13           goto CHECK_0X00H
+14       else if CL == 3 then
+15           goto CHECK_X000H
+16       end if
+17       AH ← AH AND 1H
+18       REPORT ← REPORT OR AH
+19       AH ← CH
+20       RESULT_BITS ← AX
+21       goto END_PROCESS
 --------------------------------------------------
 CHECK_000XH:
-21   CL ← 1
-22   BX ← BX AND 000FH
-23   if BX > 0009H then
-24       BX ← BX + 0006H
-25       BX ← BX AND 001FH
-26       AL ← AL + BL
-27       goto LOOP
-28   else
-29       AL ← AL + BL
-30       goto LOOP
-31   end if
-
+22   CL ← 1
+23   BX ← BX AND 000FH         // isolate least-significant nibble 24   if BX > 0009H then
+25       BX ← BX + 0006H       // add 6 for BCD correction 26       BX ← BX AND 001FH
+27       AL ← AL + BL
+28       goto LOOP
+29   else
+30       AL ← AL + BL
+31       goto LOOP
+32   end if
 --------------------------------------------------
 CHECK_00X0H:
-32   CL ← 2
-33   BX ← BX AND 00F0H
-34   if BX > 0090H then
-35       BX ← BX + 0060H
-36       BX ← BX AND 01F0H
-37       AL ← AL + BL
-38       CH ← CH + BH
-39       goto LOOP
-40   else
-41       AL ← AL + BL
-42       goto LOOP
-43   end if
-
+33   CL ← 2
+34   BX ← BX AND 00F0H        // isolate second nibble
+35   if BX > 0090H then
+36       BX ← BX + 0060H
+37       BX ← BX AND 01F0H
+38       AL ← AL + BL
+39       CH ← CH + BH
+40       goto LOOP
+41   else
+42       AL ← AL + BL
+43       goto LOOP
+44   end if
 --------------------------------------------------
 CHECK_0X00H:
-44   CL ← 3
-45   BX ← BX AND 0F00H
-46   if BX > 0900H then
-47       BX ← BX + 0600H
-48       BX ← BX AND 1F00H
-49       CH ← CH + BH
-50       goto LOOP
-51   else
-52       CH ← CH + BH
-53       goto LOOP
-54   end if
-
+45   CL ← 3
+46   BX ← BX AND 0F00H        // isolate third nibble
+47   if BX > 0900H then
+48       BX ← BX + 0600H
+49       BX ← BX AND 1F00H
+50       CH ← CH + BH
+51       goto LOOP
+52   else
+53       CH ← CH + BH
+54       goto LOOP
+55   end if
 --------------------------------------------------
 CHECK_X000H:
-55   CL ← 4
-56   BX ← BX AND 0F000H
-57   if BX > 9000H then
-58       BX ← BX + 6000H
-59       Load FLAGS into AH
-60       BX ← BX AND 0F000H
-61       CH ← CH + BH
-62       goto LOOP
-63   else
-64       CH ← CH + BH
-65       goto LOOP
-66   end if
-
---------------------------------------------------
-END_PROCESS:
-67   Store RESULT_BITS ← AX
-68   Terminate program
+56   CL ← 4
+57   BX ← BX AND 0F000H       // isolate most significant nibble 58   if BX > 9000H then
+59       BX ← BX + 6000H
+60       Load Status Flags Into AH Register //LAHF 61      BX ← BX AND 0F000H
+62      CH ← CH + BH
+63      goto LOOP
+64  else
+65      CH ← CH + BH
+66      goto LOOP
+67  end if
+-------------------------------------------------- END_PROCESS:
+68  RESULT_BITS ← AX
+69  Return RESULT_BITS, REPORT
 ```
 ##  Description
 
@@ -109,12 +97,13 @@ The result is stored in RESULT_BITS, and a flag report is optionally updated.<br
 
 | Register | Purpose |
 |----------|---------|
-| **AX** | General data and partial result storage |
+| **AX** | Holds the final combined 16-bit result of the BCD addition. |
 | **BX** | Holds first operand |
 | **DX** | Holds second operand |
 | **CH** | High byte accumulator |
 | **CL** | Step counter for operations |
 | **AH** | Flag checking and temporary operations |
+| **AL** | Low byte accumulator |
 
 ## End of Program
 The algorithm stops after processing all 4 digits and saving the result.
