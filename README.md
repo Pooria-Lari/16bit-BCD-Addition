@@ -73,15 +73,17 @@ CHECK_0X00H:
 CHECK_X000H:
 56   CL ← 4
 57   BX ← BX AND 0F000H       // isolate most significant nibble 58   if BX > 9000H then
-59       BX ← BX + 6000H
-60       Load Status Flags Into AH Register //LAHF 61      BX ← BX AND 0F000H
+59      BX ← BX + 6000H
+60      Load Status Flags Into AH Register //LAHF
+61      BX ← BX AND 0F000H
 62      CH ← CH + BH
 63      goto LOOP
 64  else
 65      CH ← CH + BH
 66      goto LOOP
 67  end if
--------------------------------------------------- END_PROCESS:
+--------------------------------------------------
+END_PROCESS:
 68  RESULT_BITS ← AX
 69  Return RESULT_BITS, REPORT
 ```
